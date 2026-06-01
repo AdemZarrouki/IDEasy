@@ -1,21 +1,31 @@
 name: Update URLS
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 3 * * *'
 jobs:
   updateURLS:
     runs-on: ubuntu-latest
+    env:
+      URLS_REPO: AdemZarrouki/ide-urls
+      STATUS_REPO: AdemZarrouki/ide-urls-status
+      TEST_BRANCH: test/test-workflow
     steps:
       - name: Checkout ide
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Checkout ide-urls
+      - name: Checkout ide-urls (fork test branch)
         uses: actions/checkout@v3
         with:
-          repository: devonfw/ide-urls
+          repository: ${{ env.URLS_REPO }}
+          ref: ${{ env.TEST_BRANCH }}
           path: ide-urls
+          token: ${{ secrets.ACTION_PUSH_TOKEN }}
+      - name: Checkout ide-urls-status (fork test branch)
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.STATUS_REPO }}
+          ref: ${{ env.TEST_BRANCH }}
+          path: ide-urls-status
           token: ${{ secrets.ACTION_PUSH_TOKEN }}
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -26,19 +36,35 @@ jobs:
       - name: Build and run url updater
         run: |
           mvn -B -ntp -Dstyle.color=always -pl url-updater -am install
-          mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" -Dexec.args="ide-urls PT5H30M"
+          mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java \
+            -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" \
+            -Dexec.args="ide-urls ide-urls-status PT5H30M"
         env:
           GHA_TOKEN: ${{ secrets.GHA_TOKEN }}
-      - name: Commit and push to ide-urls
+      - name: Commit and push to ide-urls (fork test branch)
         run: |
           cd ide-urls
-          git config --global user.name ${{ secrets.BUILD_USER }}
-          git config --global user.email ${{ secrets.BUILD_USER_EMAIL }}
+          git config --global user.name "${{ secrets.BUILD_USER }}"
+          git config --global user.email "${{ secrets.BUILD_USER_EMAIL }}"
           if git status -z | grep -q .
           then
             git add .
-            git commit -m "Update urls"
-            git push
+            git commit -m "Test: update urls"
+            git push origin HEAD:${{ env.TEST_BRANCH }}
+          else
+            echo "No changes, nothing to commit."
+          fi
+
+      - name: Commit and push to ide-urls-status (fork test branch)
+        run: |
+          cd ide-urls-status
+          git config --global user.name "${{ secrets.BUILD_USER }}"
+          git config --global user.email "${{ secrets.BUILD_USER_EMAIL }}"
+          if git status -z | grep -q .
+          then
+            git add .
+            git commit -m "Test: update url status"
+            git push origin HEAD:${{ env.TEST_BRANCH }}
           else
             echo "No changes, nothing to commit."
           fi
