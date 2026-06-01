@@ -19,14 +19,12 @@ jobs:
           repository: ${{ env.URLS_REPO }}
           ref: ${{ env.TEST_BRANCH }}
           path: ide-urls
-          token: ${{ secrets.ACTION_PUSH_TOKEN }}
       - name: Checkout ide-urls-status (fork test branch)
         uses: actions/checkout@v3
         with:
           repository: ${{ env.STATUS_REPO }}
           ref: ${{ env.TEST_BRANCH }}
           path: ide-urls-status
-          token: ${{ secrets.ACTION_PUSH_TOKEN }}
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
