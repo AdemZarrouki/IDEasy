@@ -58,11 +58,11 @@ public class BuildSecurityJsonFiles implements Runnable {
 
   private final Engine engine;
 
-  private BuildSecurityJsonFiles(Path urlsPath) {
+  private BuildSecurityJsonFiles(Path urlsPath, Path statusPath) {
 
     super();
     UrlFinalReport report = new UrlFinalReport();
-    this.updateManager = new UpdateManager(urlsPath, report, Instant.now());
+    this.updateManager = new UpdateManager(urlsPath, statusPath, report, Instant.now());
     IdeContextConsole context = new IdeContextConsole();
     this.urlMetadata = new UrlMetadata(context, this.updateManager.getUrlRepository());
     Settings settings = new Settings();
@@ -120,7 +120,8 @@ public class BuildSecurityJsonFiles implements Runnable {
       System.exit(1);
     }
     Path urlsPath = Path.of(args[0]);
-    new BuildSecurityJsonFiles(urlsPath).run();
+    Path statusPath = Path.of(args[1]);
+    new BuildSecurityJsonFiles(urlsPath, statusPath).run();
   }
 
   private Cve toCve(Vulnerability vulnerability, String edition, AbstractUrlUpdater urlUpdater) {
