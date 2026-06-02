@@ -36,7 +36,7 @@ jobs:
       - name: Build and run url updater
         run: |
           mvn -B -ntp -Dstyle.color=always -pl url-updater -am install
-          mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" -Dexec.args="ide-urls-status PT5H30M nest"
+          mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" -Dexec.args="ide-urls PT5H30M claude"
         env:
           ACTION_PUSH_TOKEN: ${{ secrets.ACTION_PUSH_TOKEN }}
       - name: Commit and push only changed status.json files
