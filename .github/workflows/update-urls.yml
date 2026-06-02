@@ -36,7 +36,7 @@ jobs:
       - name: Build and run url updater
         run: |
           mvn -B -ntp -Dstyle.color=always -pl url-updater -am install
-          mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" -Dexec.args="ide-urls PT5H30M claude"
+          mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" -Dexec.args="ide-urls PT5H30M copilot"
         env:
           ACTION_PUSH_TOKEN: ${{ secrets.ACTION_PUSH_TOKEN }}
       - name: Commit and push only changed status.json files
@@ -44,7 +44,7 @@ jobs:
           cd ide-urls-status
           git config --global user.name "${{ secrets.BUILD_USER }}"
           git config --global user.email "${{ secrets.CBUILD_USER_EMAIL }}"
-          CHANGED_STATUS_FILES=$(git status --porcelain | sed 's/^...//' | grep -E '(^|/)status\.json$'  || true)
+          CHANGED_STATUS_FILES=$(git status --porcelain | awk '{print $2}' | grep '/status\.json$\|^status\.json$' || true)
           if [ -n "$CHANGED_STATUS_FILES" ]; then
             echo "Changed status.json files:"
             echo "$CHANGED_STATUS_FILES"
@@ -61,7 +61,7 @@ jobs:
           cd ide-urls
           git config --global user.name "${{ secrets.BUILD_USER }}"
           git config --global user.email "${{ secrets.CBUILD_USER_EMAIL }}"
-          CHANGED_NON_STATUS_FILES=$(git status --porcelain | sed 's/^...//' | grep -Ev '(^|/)status\.json$' || true)
+          CHANGED_NON_STATUS_FILES=$(git status --porcelain | sed 's/^...//' | grep -v '/status\.json$\|^status\.json$' || true)
           if [ -n "$CHANGED_NON_STATUS_FILES" ]; then
             echo "Changed non-status.json files:"
             echo "$CHANGED_NON_STATUS_FILES"
