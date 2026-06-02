@@ -5,7 +5,6 @@ jobs:
   updateURLS:
     runs-on: ubuntu-latest
     env:
-      URLS_REPO: AdemZarrouki/ide-urls
       STATUS_REPO: AdemZarrouki/ide-urls-status
       TEST_BRANCH: test/test-workflow
     steps:
@@ -13,12 +12,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Checkout ide-urls (fork test branch)
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.URLS_REPO }}
-          ref: ${{ env.TEST_BRANCH }}
-          path: ide-urls
       - name: Checkout ide-urls-status (fork test branch)
         uses: actions/checkout@v3
         with:
@@ -36,23 +29,9 @@ jobs:
           mvn -B -ntp -Dstyle.color=always -pl url-updater -am install
           mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java \
             -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" \
-            -Dexec.args="ide-urls ide-urls-status PT5H30M"
+            -Dexec.args="ide-urls-status PT5H30M"
         env:
           GHA_TOKEN: ${{ secrets.GHA_TOKEN }}
-      - name: Commit and push to ide-urls (fork test branch)
-        run: |
-          cd ide-urls
-          git config --global user.name "${{ secrets.BUILD_USER }}"
-          git config --global user.email "${{ secrets.BUILD_USER_EMAIL }}"
-          if git status -z | grep -q .
-          then
-            git add .
-            git commit -m "Test: update urls"
-            git push origin HEAD:${{ env.TEST_BRANCH }}
-          else
-            echo "No changes, nothing to commit."
-          fi
-
       - name: Commit and push to ide-urls-status (fork test branch)
         run: |
           cd ide-urls-status
