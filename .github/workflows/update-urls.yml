@@ -36,7 +36,7 @@ jobs:
         run: |
           cd ide-urls-status
           git config --global user.name "${{ secrets.BUILD_USER }}"
-          git config --global user.email "${{ cBUILD_USER_EMAIL }}"
+          git config --global user.email "${{ CBUILD_USER_EMAIL }}"
           if git status -z | grep -q .
           then
             git add .
