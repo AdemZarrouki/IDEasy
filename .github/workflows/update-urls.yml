@@ -29,7 +29,7 @@ jobs:
           mvn -B -ntp -Dstyle.color=always -pl url-updater -am install
           mvn -B -ntp -Dstyle.color=always -pl url-updater exec:java \
             -Dexec.mainClass="com.devonfw.tools.ide.url.UpdateInitiator" \
-            -Dexec.args="ide-urls-status PT5H30M"
+            -Dexec.args="ide-urls-status PT5H30M squirrel-sql"
         env:
           GHA_TOKEN: ${{ secrets.GHA_TOKEN }}
       - name: Commit and push to ide-urls-status (fork test branch)
