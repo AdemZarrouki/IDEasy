@@ -40,9 +40,9 @@ jobs:
           git config --global user.email "${{ secrets.CBUILD_USER_EMAIL }}"
           if git status -z | grep -q .
           then
-            git add .
-            git commit -m "Test: update url status"
+            git add status.json
+            git commit -m "Update status.json"
             git push origin HEAD:${{ env.TEST_BRANCH }}
           else
-            echo "No changes, nothing to commit."
+            echo "No changes in status.json"
           fi
