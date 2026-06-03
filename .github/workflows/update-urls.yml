@@ -42,6 +42,7 @@ jobs:
       - name: Sync status.json files to ide-urls-status
         run: |
           rsync -av --delete --prune-empty-dirs \
+            --exclude='.git/' \
             --include='*/' \
             --include='status.json' \
             --exclude='*' \
