@@ -12,60 +12,56 @@ import com.devonfw.tools.ide.url.model.report.UrlFinalReport;
 import com.devonfw.tools.ide.url.updater.UpdateManager;
 
 /**
- * Main program to run the updater of ide-urls and ide-urls-status repositories.
+ * This is the main program to run the updater of {@code ide-urls} repository. It is run nightly via an automated process.
  */
 public class UpdateInitiator {
 
   private static final Logger logger = LoggerFactory.getLogger(UpdateInitiator.class.getName());
 
   /**
-   * @param args args[0] = path to ide-urls repository args[1] = path to ide-urls-status repository args[2] = timeout in Java Duration format (e.g. PT5H30M)
-   *     args[3] = optional selected tool or updater classname
+   * @param args the command-line arguments. arg[0] points to the {@code ide-urls} repository. arg[1] defines a timeout for GitHub actions in Duration
+   *     string format and arg[2] (optional) can be used to specify a single tool to update instead of all tools, either by toolname (e.g. java) or using the Classname of
+   *     the Updater (e.g. JavaAzulUrlUpdater). The timeout is used to prevent the GitHub action from running into a timeout error due to too long execution
+   *     time.
    */
   public static void main(String[] args) {
 
-    if (args.length < 2) {
-      logger.error("Error: Missing path to ide-urls and/or ide-urls-status repository.");
-      logger.error("Usage: java UpdateInitiator <path_to_ide_urls> <path_to_ide_urls_status> <duration_string_format> <tool_to_test|updater_class_name>");
+    if (args.length == 0) {
+      logger.error("Error: Missing path to repository as well as missing timeout as command line arguments.");
+      logger.error("Usage: java UpdateInitiator <path_to_repository> <duration_string_format> <tool_to_test|updater_class_name>");
       System.exit(1);
     }
 
-    String pathToUrlsRepo = args[0];
-    String pathToStatusRepo = args[1];
+    String pathToRepo = args[0];
     Instant expirationTime = null;
     String selectedTool = null;
 
-    if (args.length < 3) {
+    if (args.length < 2) {
       logger.warn("Timeout was not set, setting timeout to infinite instead.");
     } else {
       try {
-        Duration duration = Duration.parse(args[2]);
+        Duration duration = Duration.parse(args[1]);
         expirationTime = Instant.now().plus(duration);
         logger.info("Timeout was set to: {}.", expirationTime);
       } catch (DateTimeParseException e) {
         logger.error("Error: Provided timeout format is not valid.", e);
         System.exit(1);
       }
-      if (args.length > 3) {
-        selectedTool = args[3];
+      if (args.length > 2) {
+        selectedTool = args[2];
       }
     }
 
-    Path urlsRepoPath = Path.of(pathToUrlsRepo);
-    Path statusRepoPath = Path.of(pathToStatusRepo);
+    Path repoPath = Path.of(pathToRepo);
 
-    if (!urlsRepoPath.toFile().isDirectory()) {
-      logger.error("Error: Provided ide-urls path is not a valid directory.");
-      System.exit(1);
-    }
-    if (!statusRepoPath.toFile().isDirectory()) {
-      logger.error("Error: Provided ide-urls-status path is not a valid directory.");
+    if (!repoPath.toFile().isDirectory()) {
+      logger.error("Error: Provided path is not a valid directory.");
       System.exit(1);
     }
 
     UrlFinalReport urlFinalReport = new UrlFinalReport();
 
-    UpdateManager updateManager = new UpdateManager(urlsRepoPath, statusRepoPath, urlFinalReport, expirationTime);
+    UpdateManager updateManager = new UpdateManager(repoPath, urlFinalReport, expirationTime);
     if (selectedTool == null) {
       updateManager.updateAll();
     } else {

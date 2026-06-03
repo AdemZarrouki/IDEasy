@@ -60,13 +60,15 @@ import com.devonfw.tools.ide.url.tool.uv.UvUrlUpdater;
 import com.devonfw.tools.ide.url.tool.vscode.VsCodeUrlUpdater;
 import com.devonfw.tools.ide.url.tool.vscode.VsCodiumUrlUpdater;
 
+/**
+ * The {@code UpdateManager} class manages the update process for various tools by using a list of {@link AbstractUrlUpdater}s to update the
+ * {@link UrlRepository}. Each {@link AbstractUrlUpdater} is responsible for a specific {@link AbstractUrlUpdater#getTool() tool} and typically also edition.
+ */
 public class UpdateManager extends AbstractProcessorWithTimeout {
 
   private static final Logger logger = LoggerFactory.getLogger(UpdateManager.class);
 
   private final UrlRepository urlRepository;
-
-  private final UrlRepository statusRepository;
 
   private final UrlFinalReport urlFinalReport;
 
@@ -84,18 +86,32 @@ public class UpdateManager extends AbstractProcessorWithTimeout {
       new SquirrelSqlUrlUpdater(),
       new TerraformUrlUpdater(), new TomcatUrlUpdater(), new UvUrlUpdater(), new VsCodeUrlUpdater(), new VsCodiumUrlUpdater());
 
-  public UpdateManager(Path pathToUrlsRepository, Path pathToStatusRepository, UrlFinalReport urlFinalReport, Instant expirationTime) {
-    this.urlRepository = UrlRepository.load(pathToUrlsRepository);
-    this.statusRepository = UrlRepository.load(pathToStatusRepository);
+  /**
+   * The constructor.
+   *
+   * @param pathToRepository the {@link Path} to the {@code ide-urls} repository to update.
+   * @param expirationTime for GitHub actions url-update job
+   */
+  public UpdateManager(Path pathToRepository, UrlFinalReport urlFinalReport, Instant expirationTime) {
+
+    this.urlRepository = UrlRepository.load(pathToRepository);
     this.urlFinalReport = urlFinalReport;
     setExpirationTime(expirationTime);
   }
 
+  /**
+   * @return the {@link List} with all registered {@link AbstractUrlUpdater updaters}.
+   */
   public List<AbstractUrlUpdater> getUpdaters() {
+
     return this.updaters;
   }
 
+  /**
+   * Updates {@code ide-urls} for all tools their editions and all found versions.
+   */
   public void updateAll() {
+
     for (AbstractUrlUpdater updater : this.updaters) {
       if (isTimeoutExpired()) {
         break;
@@ -104,7 +120,13 @@ public class UpdateManager extends AbstractProcessorWithTimeout {
     }
   }
 
+  /**
+   * Update only a single tool. Mainly used in local development only to test updater only for a tool where changes have been made.
+   *
+   * @param tool the name of the tool to update.
+   */
   public void update(String tool) {
+
     for (AbstractUrlUpdater updater : this.updaters) {
       if (updater.getTool().equals(tool) || updater.getClass().getSimpleName().equals(tool)) {
         update(updater);
@@ -126,7 +148,15 @@ public class UpdateManager extends AbstractProcessorWithTimeout {
     }
   }
 
+  /**
+   * Retrieves a specific {@link AbstractUrlUpdater} based on tool name and edition.
+   *
+   * @param tool the name of the tool (e.g., "java").
+   * @param edition the edition of the tool (e.g., "oracle", "community").
+   * @return the matching {@link AbstractUrlUpdater}, or {@code null} if not found.
+   */
   public AbstractUrlUpdater retrieveUrlUpdater(String tool, String edition) {
+
     for (AbstractUrlUpdater updater : updaters) {
       if (updater.getTool().equals(tool) && updater.getEdition().equals(edition)) {
         return updater;
@@ -135,11 +165,15 @@ public class UpdateManager extends AbstractProcessorWithTimeout {
     return null;
   }
 
+  /**
+   * Returns the {@link UrlRepository} instance used for storing and updating tool URLs.
+   *
+   * @return the {@link UrlRepository} instance.
+   */
   public UrlRepository getUrlRepository() {
+
     return this.urlRepository;
   }
 
-  public UrlRepository getStatusRepository() {
-    return this.statusRepository;
-  }
+
 }
