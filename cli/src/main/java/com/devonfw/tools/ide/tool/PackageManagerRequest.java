@@ -28,6 +28,8 @@ public final class PackageManagerRequest {
 
   private ToolCommandlet packageManager;
 
+  private ToolInstallRequest toolInstallRequest;
+
   private ProcessContext processContext;
 
   private ProcessMode processMode;
@@ -121,6 +123,27 @@ public final class PackageManagerRequest {
       throw new IllegalStateException();
     }
     this.packageManager = packageManager;
+    return this;
+  }
+
+  /**
+   * @return the optional parent {@link ToolInstallRequest} if this package-manager invocation happens during a tool installation.
+   */
+  public ToolInstallRequest getToolInstallRequest() {
+
+    return this.toolInstallRequest;
+  }
+
+  /**
+   * @param toolInstallRequest the parent {@link ToolInstallRequest} if this package-manager invocation happens during a tool installation.
+   * @return this {@link PackageManagerRequest} for fluent API calls.
+   */
+  public PackageManagerRequest setToolInstallRequest(ToolInstallRequest toolInstallRequest) {
+
+    if (this.toolInstallRequest != null) {
+      throw new IllegalStateException();
+    }
+    this.toolInstallRequest = toolInstallRequest;
     return this;
   }
 

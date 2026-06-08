@@ -297,7 +297,7 @@ public abstract class ToolCommandlet extends Commandlet implements Tags {
 
     completeRequest(request);
     if (request.isInstallLoop()) {
-      return toolAlreadyInstalled(request);
+      return toolInstallLoopDetected(request);
     }
     return doInstall(request);
   }
@@ -557,6 +557,18 @@ public abstract class ToolCommandlet extends Commandlet implements Tags {
     logToolAlreadyInstalled(request);
     cveCheck(request);
     postInstall(request);
+    return createExistingToolInstallation(request);
+  }
+
+  /**
+   * Called if a recursive installation loop was detected. Unlike {@link #toolAlreadyInstalled(ToolInstallRequest)}, this must not trigger CVE checks or
+   * post-install hooks again because those side effects belong to the original installation request in the parent chain.
+   *
+   * @param request the {@link ToolInstallRequest}.
+   * @return the best known existing {@link ToolInstallation}.
+   */
+  protected ToolInstallation toolInstallLoopDetected(ToolInstallRequest request) {
+
     return createExistingToolInstallation(request);
   }
 

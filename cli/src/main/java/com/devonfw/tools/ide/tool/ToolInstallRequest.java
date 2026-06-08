@@ -81,7 +81,7 @@ public final class ToolInstallRequest {
       throw new IllegalStateException(); // this method was called too early
     }
     StringBuilder sb = new StringBuilder();
-    boolean loopFound = detectInstallLoopRecursively(this.requested, sb);
+    boolean loopFound = hasInstallLoop(sb);
     if (loopFound) {
       LOG.warn("Found installation loop:\n"
               + "{}\n"
@@ -93,12 +93,30 @@ public final class ToolInstallRequest {
     return loopFound;
   }
 
+  /**
+   * @return {@code true} if this request already appears in its parent chain, {@code false} otherwise.
+   */
+  public boolean hasInstallLoop() {
+
+    return hasInstallLoop(null);
+  }
+
+  private boolean hasInstallLoop(StringBuilder sb) {
+
+    if ((this.requested == null) || (this.requested.getEdition() == null)) {
+      throw new IllegalStateException(); // this method was called too early
+    }
+    return detectInstallLoopRecursively(this.requested, sb);
+  }
+
   private boolean detectInstallLoopRecursively(ToolEditionAndVersion toolEditionAndVersion, StringBuilder sb) {
 
     if (this.requested != toolEditionAndVersion) {
       if (this.requested.getEdition().equals(toolEditionAndVersion.getEdition())) {
         if (this.requested.getResolvedVersion().equals(toolEditionAndVersion.getResolvedVersion())) {
-          sb.append(this.requested);
+          if (sb != null) {
+            sb.append(this.requested);
+          }
           return true;
         }
       }

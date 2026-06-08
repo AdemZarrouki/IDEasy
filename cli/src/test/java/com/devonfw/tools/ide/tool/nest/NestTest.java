@@ -85,7 +85,15 @@ class NestTest extends AbstractIdeContextTest {
   private void checkInstallation(IdeTestContext context) {
 
     assertThat(context).logAtInfo().hasMessageContaining("npm install -gf @nestjs/cli@11.0.21");
+    assertThat(countLogMessagesContaining(context, "No CVEs found for version 9.9.2 of tool npm")).isEqualTo(1);
+    assertThat(countLogMessagesContaining(context, "No CVEs found for version v18.19.1 of tool node")).isEqualTo(1);
+    assertThat(context).logAtWarning().hasNoMessageContaining("Found installation loop");
 
     assertThat(context).logAtSuccess().hasMessageContaining("Successfully installed nest in version 11.0.21");
+  }
+
+  private long countLogMessagesContaining(IdeTestContext context, String message) {
+
+    return context.getTestStartContext().getEntries().stream().filter(entry -> entry.message().contains(message)).count();
   }
 }
