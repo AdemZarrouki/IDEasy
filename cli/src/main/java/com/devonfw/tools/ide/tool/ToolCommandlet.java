@@ -297,7 +297,7 @@ public abstract class ToolCommandlet extends Commandlet implements Tags {
 
     completeRequest(request);
     if (request.isInstallLoop()) {
-      return toolAlreadyInstalled(request);
+      return createExistingToolInstallation(request);
     }
     return doInstall(request);
   }

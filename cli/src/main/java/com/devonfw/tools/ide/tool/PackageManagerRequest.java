@@ -32,6 +32,8 @@ public final class PackageManagerRequest {
 
   private ProcessMode processMode;
 
+  private ToolInstallRequest parentInstallRequest;
+
   /**
    * The constructor.
    *
@@ -163,6 +165,27 @@ public final class PackageManagerRequest {
       throw new IllegalStateException();
     }
     this.processMode = processMode;
+    return this;
+  }
+
+  /**
+   * @return the parent {@link ToolInstallRequest} that triggered this package-manager request or {@code null}.
+   */
+  public ToolInstallRequest getParentInstallRequest() {
+
+    return this.parentInstallRequest;
+  }
+
+  /**
+   * @param parentInstallRequest the parent {@link ToolInstallRequest} that triggered this package-manager request.
+   * @return this {@link PackageManagerRequest} for fluent API calls.
+   */
+  public PackageManagerRequest setParentInstallRequest(ToolInstallRequest parentInstallRequest) {
+
+    if (this.parentInstallRequest != null) {
+      throw new IllegalStateException();
+    }
+    this.parentInstallRequest = parentInstallRequest;
     return this;
   }
 

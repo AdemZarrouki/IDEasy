@@ -159,7 +159,7 @@ public abstract class LocalToolCommandlet extends ToolCommandlet {
 
     completeRequest(request); // most likely already done, but if installTool was called directly and not from install
     if (request.isInstallLoop()) {
-      return toolAlreadyInstalled(request);
+      return createExistingToolInstallation(request);
     }
     ToolEditionAndVersion requested = request.getRequested();
     ToolEdition toolEdition = requested.getEdition();

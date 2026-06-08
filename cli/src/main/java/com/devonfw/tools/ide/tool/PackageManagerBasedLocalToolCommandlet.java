@@ -90,9 +90,16 @@ public abstract class PackageManagerBasedLocalToolCommandlet<P extends ToolComma
     completeRequest(request);
     ProcessContext pc = request.getProcessContext();
     ToolCommandlet pm = request.getPackageManager();
-    if (!skipInstallation) { // See Node.postInstallOnNewInstallation
-      ToolInstallRequest installRequest = new ToolInstallRequest(true);
-      installRequest.setProcessContext(pc.createChild());
+    if (!skipInstallation) {
+      ToolInstallRequest parentInstallRequest = request.getParentInstallRequest();
+      ToolInstallRequest installRequest;
+      if (parentInstallRequest == null) {
+        installRequest = new ToolInstallRequest(true);
+        installRequest.setProcessContext(pc.createChild());
+      } else {
+        installRequest = new ToolInstallRequest(parentInstallRequest);
+        installRequest.suppressInstallLoopWarning();
+      }
       pm.install(installRequest);
     }
     return pm.runTool(pc, request.getProcessMode(), request.getArgs());
@@ -195,13 +202,13 @@ public abstract class PackageManagerBasedLocalToolCommandlet<P extends ToolComma
   protected final void performToolInstallation(ToolInstallRequest request, Path installationPath) {
 
     PackageManagerRequest packageManagerRequest = new PackageManagerRequest(PackageManagerRequest.TYPE_INSTALL, getPackageName())
-        .setProcessContext(request.getProcessContext()).setVersion(request.getRequested().getResolvedVersion());
+        .setProcessContext(request.getProcessContext()).setVersion(request.getRequested().getResolvedVersion()).setParentInstallRequest(request);
     runPackageManager(packageManagerRequest, isSkipInstallation()).failOnError();
     this.installedVersion.invalidate();
   }
 
   /**
-   * @return {@code false} if the underlying {@link #getPackageManagerClass() package manager} should also be installed, {@code false} to skip that additional
+   * @return {@code false} if the underlying {@link #getPackageManagerClass() package manager} should also be installed, {@code true} to skip that additional
    *     installation (e.g. to prevent infinite loop in case of cyclic dependencies between package manager based tools such as node and npm).
    */
   protected boolean isSkipInstallation() {

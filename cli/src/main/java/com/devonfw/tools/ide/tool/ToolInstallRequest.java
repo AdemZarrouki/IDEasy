@@ -38,6 +38,8 @@ public final class ToolInstallRequest {
 
   private Step step;
 
+  private boolean suppressInstallLoopWarning;
+
   /**
    * The constructor.
    *
@@ -83,12 +85,16 @@ public final class ToolInstallRequest {
     StringBuilder sb = new StringBuilder();
     boolean loopFound = detectInstallLoopRecursively(this.requested, sb);
     if (loopFound) {
-      LOG.warn("Found installation loop:\n"
-              + "{}\n"
-              + "This typically indicates an internal bug in IDEasy.\n"
-              + "Please report this bug, when you see this and include this entire warning message.\n"
-              + "We are now trying to prevent an infinity loop and abort the recursive installation.",
-          sb);
+      if (this.suppressInstallLoopWarning) {
+        LOG.debug("Found expected installation loop:\n{}", sb);
+      } else {
+        LOG.warn("Found installation loop:\n"
+                + "{}\n"
+                + "This typically indicates an internal bug in IDEasy.\n"
+                + "Please report this bug, when you see this and include this entire warning message.\n"
+                + "We are now trying to prevent an infinity loop and abort the recursive installation.",
+            sb);
+      }
     }
     return loopFound;
   }
@@ -256,6 +262,14 @@ public final class ToolInstallRequest {
       throw new IllegalStateException();
     }
     this.step = step;
+  }
+
+  /**
+   * Suppresses the warning for expected install loops such as package-manager bootstrap cycles.
+   */
+  public void suppressInstallLoopWarning() {
+
+    this.suppressInstallLoopWarning = true;
   }
 
   /**
