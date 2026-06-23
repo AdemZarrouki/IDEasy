@@ -70,6 +70,8 @@ public class UpdateManager extends AbstractProcessorWithTimeout {
 
   private final UrlRepository urlRepository;
 
+  private final UrlRepository statusRepository;
+
   private final UrlFinalReport urlFinalReport;
 
   private final List<AbstractUrlUpdater> updaters = List.of(
@@ -92,11 +94,25 @@ public class UpdateManager extends AbstractProcessorWithTimeout {
    * @param pathToRepository the {@link Path} to the {@code ide-urls} repository to update.
    * @param expirationTime for GitHub actions url-update job
    */
-  public UpdateManager(Path pathToRepository, UrlFinalReport urlFinalReport, Instant expirationTime) {
+  public UpdateManager(Path pathToRepository, Path pathToStatusRepository, UrlFinalReport urlFinalReport, Instant expirationTime) {
 
     this.urlRepository = UrlRepository.load(pathToRepository);
+    this.statusRepository = UrlRepository.load(pathToStatusRepository);
+    this.urlRepository.setStatusRepository(this.statusRepository);
     this.urlFinalReport = urlFinalReport;
     setExpirationTime(expirationTime);
+  }
+
+  /**
+   * The constructor.
+   *
+   * @param pathToRepository the {@link Path} to the {@code ide-urls} repository to update.
+   * @param urlFinalReport the final report for the URL update run.
+   * @param expirationTime for GitHub actions url-update job.
+   */
+  public UpdateManager(Path pathToRepository, UrlFinalReport urlFinalReport, Instant expirationTime) {
+
+    this(pathToRepository, pathToRepository, urlFinalReport, expirationTime);
   }
 
   /**

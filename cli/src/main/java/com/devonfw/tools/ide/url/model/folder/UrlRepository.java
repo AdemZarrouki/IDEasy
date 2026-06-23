@@ -7,6 +7,8 @@ import java.nio.file.Path;
  */
 public class UrlRepository extends AbstractUrlFolder<UrlTool> {
 
+  private UrlRepository statusRepository;
+
   /**
    * The constructor.
    *
@@ -15,6 +17,25 @@ public class UrlRepository extends AbstractUrlFolder<UrlTool> {
   public UrlRepository(Path path) {
 
     super(path, "urls");
+  }
+
+
+  /**
+   * @return the {@link UrlRepository} used to store status files.
+   */
+  public UrlRepository getStatusRepository() {
+    if (this.statusRepository == null) {
+      return this;
+    }
+    return this.statusRepository;
+  }
+
+
+  /**
+   * @param statusRepository the {@link UrlRepository} used to store status files.
+   */
+  public void setStatusRepository(UrlRepository statusRepository) {
+    this.statusRepository = statusRepository;
   }
 
   /**
